@@ -1,0 +1,12 @@
+bin/
+obj/
+*.user
+.vs/
+docs/*.log
+
+# 对话分支：A/B 两个方案的对照副本，不参与本仓库构建与提交
+.Mcdl-PCL/
+Mcdl-PCL/
+.ref/
+dist/
+PCLVD-UI/

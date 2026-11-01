@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <RootNamespace>Mcdl.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- PCL 的 MC 百科对照表（26k 条），按《PCL 存储库合理使用指南》重度使用条款沿用，见 LICENCE-PCL.txt -->
+    <EmbeddedResource Include="Resources\WikiEntries.txt" />
+  </ItemGroup>
+
+</Project>

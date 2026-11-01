@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>PclVd</AssemblyName>
+    <RootNamespace>Mcdl.App</RootNamespace>
+    <Product>PCL VD</Product>
+    <AssemblyTitle>PCL VD</AssemblyTitle>
+    <Description>Minecraft 版本 / 模组 下载器（PCL 社区版本）</Description>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mcdl.Core\Mcdl.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\pcl-font.ttf" />
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,414 @@
+<Window x:Class="Mcdl.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="PCL VD"
+        Width="1000" Height="660" MinWidth="900" MinHeight="580"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        FontFamily="/Assets/#PCL English, Microsoft YaHei UI"
+        Icon="Assets/app.ico"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+
+  <!-- PCL 的窗口形态：透明窗口 + 圆角浮层 + 阴影 -->
+  <Border Margin="8" CornerRadius="6" Background="White">
+    <Border.Effect>
+      <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.22" Color="#000000" />
+    </Border.Effect>
+
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="48" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="22" />
+      </Grid.RowDefinitions>
+
+      <!-- 标题栏 -->
+      <Border Grid.Row="0" Background="{StaticResource ColorBrush2}" CornerRadius="6,6,0,0"
+              MouseLeftButtonDown="OnTitleBarMouseDown">
+        <Grid>
+          <StackPanel Orientation="Horizontal" Margin="16,0" VerticalAlignment="Center">
+            <Image Source="Assets/app.ico" Width="20" Height="20" />
+            <TextBlock Text="PCL VD" Foreground="White" FontSize="15" FontWeight="SemiBold"
+                       Margin="9,0,0,0" VerticalAlignment="Center" />
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Style="{StaticResource PillButton}" Tag="{Binding IsVersionTab}"
+                    Command="{Binding ShowVersionsCommand}" Margin="3,0" ToolTip="下载游戏版本与加载器">
+              <StackPanel Orientation="Horizontal">
+                <Path Data="M554 691V171h-85V691L241 463l-60 60L512 853l331-330-60-60z"
+                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      Width="13" Height="13" Stretch="Uniform" />
+                <TextBlock Text="下载" Margin="6,0,0,0"
+                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+              </StackPanel>
+            </Button>
+            <Button Style="{StaticResource PillButton}" Tag="{Binding IsResourceTab}"
+                    Command="{Binding ShowResourcesCommand}" Margin="3,0" ToolTip="模组 / 光影 / 资源包 / 整合包">
+              <StackPanel Orientation="Horizontal">
+                <Path Data="M384 128h640v128H384zM160 192m-96 0a96 96 0 1 0 192 0 96 96 0 1 0-192 0M384 448h640v128H384zM160 512m-96 0a96 96 0 1 0 192 0 96 96 0 1 0-192 0M384 768h640v128H384zM160 832m-96 0a96 96 0 1 0 192 0 96 96 0 1 0-192 0"
+                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      Width="13" Height="13" Stretch="Uniform" />
+                <TextBlock Text="资源" Margin="6,0,0,0"
+                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+              </StackPanel>
+            </Button>
+            <Button Style="{StaticResource PillButton}" Tag="{Binding IsAboutTab}"
+                    Command="{Binding ShowAboutCommand}" Margin="3,0" ToolTip="关于 PCL VD 与许可">
+              <StackPanel Orientation="Horizontal">
+                <Path Data="M512 917.333333c223.861333 0 405.333333-181.472 405.333333-405.333333S735.861333 106.666667 512 106.666667 106.666667 288.138667 106.666667 512s181.472 405.333333 405.333333 405.333333z m0-85.333333c-176.730667 0-320-143.269333-320-320s143.269333-320 320-320 320 143.269333 320 320-143.269333 320-320 320z M480 640h64v64h-64z M480 320h64v256h-64z"
+                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      Width="13" Height="13" Stretch="Uniform" />
+                <TextBlock Text="关于" Margin="6,0,0,0"
+                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0">
+            <Button Style="{StaticResource CaptionButton}" Click="OnMinimizeClick" ToolTip="最小化">
+              <Rectangle Width="10" Height="1" Fill="White" />
+            </Button>
+            <Button Style="{StaticResource CaptionButton}" Click="OnCloseClick" Margin="4,0,0,0" ToolTip="关闭">
+              <Path Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0833,22.1667L 55.3333,28.4167L 44.2499,39.5L 55.3333,50.5833L 49.0833,56.8333L 37.9999,45.75L 26.9166,56.8333L 20.6666,50.5833L 31.7499,39.5L 20.6666,28.4167L 26.9166,22.1667 Z"
+                    Fill="White" Width="9" Height="9" Stretch="Uniform" />
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- 目标目录 -->
+      <Border Grid.Row="1" VerticalAlignment="Top" Background="#FAFAFA"
+              BorderBrush="{StaticResource BorderSoftBrush}" BorderThickness="0,0,0,1" Padding="12,6">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Text=".minecraft" Style="{StaticResource Muted}"
+                     VerticalAlignment="Center" Margin="0,0,8,0" />
+          <TextBox Grid.Column="1" x:Name="PathBox" Text="{Binding TargetDir, Mode=TwoWay}"
+                   VerticalAlignment="Center" />
+          <Button Grid.Column="2" Content="浏览…" Style="{StaticResource FlatButton}"
+                  Margin="8,0,0,0" Click="OnBrowseClick" />
+        </Grid>
+      </Border>
+
+      <!-- 页面 -->
+      <Grid Grid.Row="1" Margin="0,41,0,0">
+
+        <!-- 下载页 -->
+        <Grid x:Name="PageVersion" Visibility="{Binding IsVersionTab, Converter={StaticResource BoolToVis}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="270" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <Border Grid.Column="0" Style="{StaticResource Sidebar}" Padding="10,8">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <TextBox Grid.Row="0" Text="{Binding SearchText, Mode=TwoWay}" />
+              <Grid Grid.Row="1" Margin="2,8,2,4">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding VersionCountText}" Style="{StaticResource Muted}"
+                           VerticalAlignment="Center" />
+                <CheckBox Grid.Column="1" Content="含快照" FontSize="11" IsChecked="{Binding ShowSnapshots, Mode=TwoWay}"
+                          VerticalAlignment="Center" />
+              </Grid>
+              <ListBox Grid.Row="2" ItemsSource="{Binding Versions}"
+                       SelectedItem="{Binding SelectedVersion, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <Grid Height="30" Margin="8,0">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Grid.Column="0" Text="{Binding Id}" FontSize="13" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="1" Text="{Binding SubText}" FontSize="11" Margin="8,0,0,0"
+                                 VerticalAlignment="Center" Foreground="{StaticResource ColorBrushGray4}" />
+                      <TextBlock Grid.Column="2" Text="{Binding TypeLabel}" FontSize="11"
+                                 VerticalAlignment="Center" Foreground="{StaticResource ColorBrush2}" />
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Grid>
+          </Border>
+
+          <Grid Grid.Column="1" Margin="18,10,18,10">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0">
+              <TextBlock Style="{StaticResource H1}" Text="{Binding DetailTitle}" />
+              <TextBlock Style="{StaticResource Muted}" Text="{Binding DetailSubtitle}" TextWrapping="Wrap" Margin="0,3,0,0" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+              <StackPanel Width="520" HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H2}" Text="数据源" />
+                <ComboBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource, Mode=TwoWay}" />
+                <TextBlock Style="{StaticResource Muted}" Text="{Binding SourceHint}" TextWrapping="Wrap" Margin="0,4,0,12" />
+
+                <TextBlock Style="{StaticResource H2}" Text="模组加载器" />
+                <ComboBox ItemsSource="{Binding Loaders}" SelectedItem="{Binding SelectedLoader, Mode=TwoWay}" Margin="0,0,0,12" />
+
+                <TextBlock Style="{StaticResource H2}" Text="加载器版本" />
+                <ComboBox ItemsSource="{Binding LoaderVersions}" SelectedItem="{Binding SelectedLoaderVersion, Mode=TwoWay}"
+                          IsEnabled="{Binding IsLoaderVersionEnabled}" Margin="0,0,0,12" />
+
+                <TextBlock Style="{StaticResource H2}" Text="Java 运行时" />
+                <ComboBox ItemsSource="{Binding JavaOptions}" SelectedItem="{Binding SelectedJava, Mode=TwoWay}" />
+              </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Width="520" HorizontalAlignment="Left" Margin="0,12,0,0">
+              <Border Background="{StaticResource ColorBrush8}" CornerRadius="3" Padding="10,8"
+                      Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" Margin="0,0,0,8">
+                <StackPanel>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding ProgressText}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="1" Text="{Binding SpeedText}" FontSize="11"
+                               Foreground="{StaticResource ColorBrushGray4}" Margin="8,0,0,0" />
+                  </Grid>
+                  <ProgressBar Height="4" Margin="0,4" Minimum="0" Maximum="1" Value="{Binding ProgressValue}"
+                               Foreground="{StaticResource ColorBrush2}" />
+                  <TextBlock Text="{Binding CurrentFileName}" Style="{StaticResource Muted}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </Border>
+              <Button Style="{StaticResource PrimaryButton}" Content="{Binding InstallButtonText}"
+                      Command="{Binding InstallCommand}" />
+              <TextBlock Style="{StaticResource Muted}" Text="{Binding StatusText}" TextWrapping="Wrap" Margin="0,8,0,0" />
+            </StackPanel>
+          </Grid>
+        </Grid>
+
+        <!-- 资源页 -->
+        <Grid x:Name="PageResource" Visibility="{Binding IsResourceTab, Converter={StaticResource BoolToVis}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="290" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <Border Grid.Column="0" Style="{StaticResource Sidebar}" Padding="10,8">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <TextBox Grid.Row="0" x:Name="ResourceSearchBox" Text="{Binding ResourceQuery, Mode=TwoWay}"
+                       KeyDown="OnResourceSearchKeyDown" />
+              <Grid Grid.Row="1" Margin="0,6">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ComboBox Grid.Column="0" ItemsSource="{Binding ResourceTypeOptions}"
+                          SelectedItem="{Binding SelectedResourceType, Mode=TwoWay}" />
+                <Button Grid.Column="1" Content="搜索" Style="{StaticResource FlatButton}" Margin="8,0,0,0"
+                        Command="{Binding SearchResourcesCommand}" />
+              </Grid>
+              <Grid Grid.Row="2" Margin="0,0,0,6">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="1.3*" />
+                  <ColumnDefinition Width="8" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ComboBox Grid.Column="0" ItemsSource="{Binding ResourceVersionOptions}"
+                          SelectedItem="{Binding SelectedResourceVersionOption, Mode=TwoWay}" />
+                <ComboBox Grid.Column="2" ItemsSource="{Binding ResourceLoaderOptions}"
+                          SelectedItem="{Binding SelectedResourceLoaderOption, Mode=TwoWay}" />
+              </Grid>
+              <TextBlock Grid.Row="3" Text="{Binding ResourceCountText}" Style="{StaticResource Muted}" Margin="2,0,2,6" />
+              <ListBox Grid.Row="4" ItemsSource="{Binding ResourceResults}"
+                       SelectedItem="{Binding SelectedResource, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <Grid Margin="6,4">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                      </Grid.ColumnDefinitions>
+                      <Border Grid.Column="0" Width="32" Height="32" CornerRadius="3" Background="{StaticResource ColorBrush8}"
+                              VerticalAlignment="Top">
+                        <Grid>
+                          <TextBlock Text="{Binding Initial}" FontSize="13" FontWeight="SemiBold"
+                                     Foreground="{StaticResource ColorBrush2}"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          <Image Source="{Binding Icon}" Stretch="UniformToFill"
+                                 Visibility="{Binding HasIcon, Converter={StaticResource BoolToVis}}" />
+                        </Grid>
+                      </Border>
+                      <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="{Binding Title}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Description}" FontSize="11" TextWrapping="Wrap" MaxHeight="30"
+                                   Foreground="{StaticResource ColorBrushGray4}" />
+                        <TextBlock Text="{Binding StatsText}" FontSize="11" Foreground="{StaticResource ColorBrushGray4}" />
+                      </StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Grid>
+          </Border>
+
+          <Grid Grid.Column="1" Margin="18,10,18,10">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Border Grid.Column="0" Width="52" Height="52" CornerRadius="3" Background="{StaticResource ColorBrush8}"
+                      VerticalAlignment="Top">
+                <Grid>
+                  <TextBlock Text="?" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource ColorBrush2}"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <Image Source="{Binding ResourceIcon}" Stretch="UniformToFill"
+                         Visibility="{Binding HasResourceIcon, Converter={StaticResource BoolToVis}}" />
+                </Grid>
+              </Border>
+              <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                <TextBlock Style="{StaticResource H1}" Text="{Binding ResourceTitle}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding ResourceSubtitle}" FontSize="11" TextWrapping="Wrap"
+                           Foreground="{StaticResource ColorBrushGray4}" Margin="0,3,0,0" />
+              </StackPanel>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+              <StackPanel Width="560" HorizontalAlignment="Left">
+                <TextBlock Style="{StaticResource H2}" Text="安装到" />
+                <TextBlock Text="{Binding ResourceTargetText}" FontSize="11" TextWrapping="Wrap"
+                           Foreground="{StaticResource ColorBrushGray4}" Margin="0,0,0,10" />
+
+                <TextBlock Style="{StaticResource H2}" Text="选择版本" />
+                <ComboBox ItemsSource="{Binding ResourceVersions}" SelectedItem="{Binding SelectedResourceVersion, Mode=TwoWay}"
+                          IsEnabled="{Binding HasResourceVersions}" Margin="0,0,0,10" />
+
+                <Border Background="{StaticResource ColorBrush8}" CornerRadius="3" Padding="10,8" Margin="0,0,0,8"
+                        Visibility="{Binding IsResourceBusy, Converter={StaticResource BoolToVis}}">
+                  <StackPanel>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Grid.Column="0" Text="{Binding ResourceProgressText}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Grid.Column="1" Text="{Binding ResourceSpeedText}" FontSize="11"
+                                 Foreground="{StaticResource ColorBrushGray4}" Margin="8,0,0,0" />
+                    </Grid>
+                    <ProgressBar Height="4" Margin="0,4" Minimum="0" Maximum="1" Value="{Binding ResourceProgressValue}"
+                                 Foreground="{StaticResource ColorBrush2}" />
+                  </StackPanel>
+                </Border>
+
+                <TextBlock Text="{Binding ResourceHint}" FontSize="11" TextWrapping="Wrap"
+                           Foreground="{StaticResource ColorBrushGray4}" />
+              </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Width="560" HorizontalAlignment="Left" Margin="0,12,0,0">
+              <Button Style="{StaticResource PrimaryButton}" Content="{Binding InstallResourceButtonText}"
+                      Command="{Binding InstallResourceCommand}" />
+              <TextBlock Style="{StaticResource Muted}" Text="{Binding ResourceStatus}" TextWrapping="Wrap" Margin="0,8,0,0" />
+            </StackPanel>
+          </Grid>
+        </Grid>
+
+        <!-- 关于页 -->
+        <Border x:Name="PageAbout" Padding="18"
+                Visibility="{Binding IsAboutTab, Converter={StaticResource BoolToVis}}">
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Width="640" HorizontalAlignment="Left">
+              <StackPanel Orientation="Horizontal">
+                <Image Source="Assets/app.ico" Width="48" Height="48" />
+                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                  <TextBlock Text="PCL VD" FontSize="19" FontWeight="SemiBold" />
+                  <TextBlock Text="Minecraft 版本 / 模组 下载器 · 社区版本" Style="{StaticResource Muted}" Margin="0,2,0,0" />
+                </StackPanel>
+              </StackPanel>
+
+              <Border Height="1" Background="{StaticResource BorderSoftBrush}" Margin="0,12" />
+
+              <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21"
+                         Text="PCL VD 是第三方基于 Plain Craft Launcher（PCL）独立进行的二次创作，与 PCL 官方无关，也不是 PCL 的官方后续版本。" />
+
+              <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21" Margin="0,8,0,0"
+                         Foreground="{StaticResource ColorBrushGray4}"
+                         Text="本项目沿用了 PCL 的部分下载与检索设计、图标几何、字体与 MC 百科中英对照表（WikiEntries），依《PCL 存储库合理使用指南》「重度使用」条款使用：已标注第三方身份、名称以 PCL 开头并带第三方后缀、界面主色相为蓝色、并在本页首位给出作者署名与赞助入口。" />
+
+              <TextBlock Text="原作者：龙腾猫跃（LTCat）" FontSize="13" FontWeight="SemiBold" Margin="0,10,0,0" />
+
+              <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Style="{StaticResource FlatButton}" Content="PCL 项目主页" Click="OnOpenPclRepoClick" />
+                <Button Style="{StaticResource FlatButton}" Content="赞助作者（爱发电）" Click="OnOpenSponsorClick" Margin="8,0,0,0" />
+                <Button Style="{StaticResource FlatButton}" Content="查看许可指南" Click="OnOpenLicenceClick" Margin="8,0,0,0" />
+              </StackPanel>
+
+              <Border Height="1" Background="{StaticResource BorderSoftBrush}" Margin="0,14" />
+
+              <TextBlock Style="{StaticResource H2}" Text="数据来源" />
+              <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource ColorBrushGray4}"
+                         Text="版本与依赖：Mojang piston-meta / piston-data（可换 BMCLAPI 镜像）；模组与整合包：Modrinth API v2；中文名对照：PCL WikiEntries（源自 MC 百科）。" />
+
+              <TextBlock Style="{StaticResource H2}" Text="版权与许可" Margin="0,10,0,3" />
+              <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource ColorBrushGray4}"
+                         Text="PCL 及其相关资源版权归龙腾猫跃所有；本程序仅为第三方二次创作，公开源代码并沿用同一份许可指南（随程序附带 LICENCE-PCL.txt）。" />
+            </StackPanel>
+          </ScrollViewer>
+        </Border>
+
+        <!-- 日志浮层 -->
+        <Border VerticalAlignment="Bottom" Height="170" Margin="12"
+                Background="White" BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" CornerRadius="3"
+                Visibility="{Binding IsLogVisible, Converter={StaticResource BoolToVis}}">
+          <ScrollViewer Margin="10">
+            <TextBlock Text="{Binding LogText}" FontFamily="Consolas" FontSize="11" TextWrapping="Wrap"
+                       Foreground="{StaticResource ColorBrushGray4}" />
+          </ScrollViewer>
+        </Border>
+      </Grid>
+
+      <!-- 状态栏 -->
+      <Border Grid.Row="2" Background="#FAFAFA" BorderBrush="{StaticResource BorderSoftBrush}" BorderThickness="0,1,0,0"
+              Padding="12,0" CornerRadius="0,0,6,6">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Text="{Binding FooterText}" FontSize="11"
+                     Foreground="{StaticResource ColorBrushGray4}" VerticalAlignment="Center" />
+          <Button Grid.Column="1" Content="日志" Command="{Binding ToggleLogCommand}"
+                  Background="Transparent" BorderThickness="0" Foreground="{StaticResource ColorBrush2}"
+                  FontSize="12" Cursor="Hand" />
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

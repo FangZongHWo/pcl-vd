@@ -1,0 +1,17 @@
+PCL VD 许可说明
+================
+
+PCL VD 是第三方基于 Plain Craft Launcher（PCL）独立进行的二次创作，与 PCL 官方无关。
+
+1. 本项目自有代码
+   以 CC BY-SA 4.0 发布（《PCL 存储库合理使用指南》建议的协议）。
+   可自由使用、修改、再分发，但须保留署名，并以相同协议共享。
+
+2. 来自 PCL 的部分
+   图标几何数据（ModBase.vb 中的 Path）、WikiEntries.txt（MC 百科中英对照表）、
+   部分 UI 尺寸与配色参数，版权归 龙腾猫跃（LTCat）所有，
+   依《PCL 存储库合理使用指南》「重度使用」条款使用，全文见 LICENCE-PCL.txt。
+
+3. 第三方数据
+   Minecraft 版本与依赖来自 Mojang；模组与整合包来自 Modrinth API。
+   相关版权归各自所有者。
