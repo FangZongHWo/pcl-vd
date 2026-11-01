@@ -99,7 +99,10 @@ public partial class MainWindow : Window
 
     private void AnimateCurrentPage(MainViewModel vm)
     {
-        FrameworkElement? page = vm.IsVersionTab ? PageVersion : vm.IsResourceTab ? PageResource : PageAbout;
+        FrameworkElement? page = vm.IsVersionTab ? PageVersion
+            : vm.IsResourceTab ? PageResource
+            : vm.IsSettingsTab ? PageSettings
+            : PageAbout;
         if (page is null) return;
 
         var translate = new TranslateTransform(0, 10);

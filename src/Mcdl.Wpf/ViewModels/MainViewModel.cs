@@ -43,7 +43,8 @@ public sealed class MainViewModel : ObservableObject
 
         ShowVersionsCommand = new RelayCommand(() => SwitchTab(0));
         ShowResourcesCommand = new RelayCommand(() => SwitchTab(1));
-        ShowAboutCommand = new RelayCommand(() => SwitchTab(2));
+        ShowSettingsCommand = new RelayCommand(() => SwitchTab(2));
+        ShowAboutCommand = new RelayCommand(() => SwitchTab(3));
         SearchResourcesCommand = new AsyncRelayCommand(SearchResourcesAsync);
         InstallResourceCommand = new AsyncRelayCommand(InstallResourceAsync,
             () => SelectedResourceVersion is not null && !IsResourceBusy);
@@ -176,7 +177,39 @@ public sealed class MainViewModel : ObservableObject
     public long DownloadBytes { get; private set; }
 
     private SourceKind _sourceKind = SourceKind.Auto;
-    private readonly int _maxThreads = 32;
+    private int _maxThreads = 32;
+    public ObservableCollection<string> ThreadOptions { get; } = new() { "4", "8", "16", "32" };
+
+    public string SelectedThreads
+    {
+        get => _maxThreads.ToString();
+        set
+        {
+            if (!int.TryParse(value, out var n) || n <= 0) return;
+            if (_maxThreads == n) return;
+            _maxThreads = n;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _javaHome = "";
+    public string JavaHome
+    {
+        get => _javaHome;
+        set => Set(ref _javaHome, value ?? "");
+    }
+
+    public bool UseMirror
+    {
+        get => _sourceKind == SourceKind.BmclApi;
+        set
+        {
+            var target = value ? "国内镜像（BMCLAPI）" : "自动（官方优先，失败回落镜像）";
+            if (SelectedSource == target) return;
+            SelectedSource = target;
+            OnPropertyChanged();
+        }
+    }
 
     public string InstallButtonText => IsBusy ? "正在下载…" : "下载到该目录";
 
@@ -338,14 +371,16 @@ public sealed class MainViewModel : ObservableObject
 
     // ================= 导航 =================
 
-    private int _tab; // 0=版本 1=资源 2=关于
+    private int _tab; // 0=版本 1=资源 2=设置 3=关于
 
     public bool IsVersionTab => _tab == 0;
     public bool IsResourceTab => _tab == 1;
-    public bool IsAboutTab => _tab == 2;
+    public bool IsSettingsTab => _tab == 2;
+    public bool IsAboutTab => _tab == 3;
 
     public RelayCommand ShowVersionsCommand { get; private set; } = null!;
     public RelayCommand ShowResourcesCommand { get; private set; } = null!;
+    public RelayCommand ShowSettingsCommand { get; private set; } = null!;
     public RelayCommand ShowAboutCommand { get; private set; } = null!;
 
     private void SwitchTab(int tab)
@@ -354,6 +389,7 @@ public sealed class MainViewModel : ObservableObject
         _tab = tab;
         OnPropertyChanged(nameof(IsVersionTab));
         OnPropertyChanged(nameof(IsResourceTab));
+        OnPropertyChanged(nameof(IsSettingsTab));
         OnPropertyChanged(nameof(IsAboutTab));
 
         if (tab == 1)
