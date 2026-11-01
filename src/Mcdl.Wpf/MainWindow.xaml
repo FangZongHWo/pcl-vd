@@ -112,7 +112,12 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
               </Grid.RowDefinitions>
-              <TextBox Grid.Row="0" Text="{Binding SearchText, Mode=TwoWay}" />
+              <Grid Grid.Row="0">
+                <TextBox x:Name="VersionSearchBox" Text="{Binding SearchText, Mode=TwoWay}" />
+                <TextBlock Text="搜索版本，如 26.3 / 1.20" Foreground="#9AA2AA" Margin="9,0,0,0"
+                           VerticalAlignment="Center" IsHitTestVisible="False"
+                           Visibility="{Binding Text, ElementName=VersionSearchBox, Converter={StaticResource EmptyToVis}}" />
+              </Grid>
               <Grid Grid.Row="1" Margin="2,8,2,4">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*" />
@@ -246,7 +251,7 @@
         <!-- 资源页 -->
         <Grid x:Name="PageResource" Visibility="{Binding IsResourceTab, Converter={StaticResource BoolToVis}}">
           <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="290" />
+            <ColumnDefinition Width="320" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
 
@@ -259,8 +264,13 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
               </Grid.RowDefinitions>
-              <TextBox Grid.Row="0" x:Name="ResourceSearchBox" Text="{Binding ResourceQuery, Mode=TwoWay}"
-                       KeyDown="OnResourceSearchKeyDown" />
+              <Grid Grid.Row="0">
+                <TextBox x:Name="ResourceSearchBox" Text="{Binding ResourceQuery, Mode=TwoWay}"
+                         KeyDown="OnResourceSearchKeyDown" />
+                <TextBlock Text="搜索模组 / 光影 / 资源包 / 整合包" Foreground="#9AA2AA" Margin="9,0,0,0"
+                           VerticalAlignment="Center" IsHitTestVisible="False"
+                           Visibility="{Binding Text, ElementName=ResourceSearchBox, Converter={StaticResource EmptyToVis}}" />
+              </Grid>
               <Grid Grid.Row="1" Margin="0,6">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*" />

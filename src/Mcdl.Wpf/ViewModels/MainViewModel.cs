@@ -582,7 +582,7 @@ public sealed class MainViewModel : ObservableObject
     {
         var followLabel = instance is null
             ? "跟随实例"
-            : $"跟随实例（{instance.MinecraftVersion}）";
+            : $"跟随 {instance.MinecraftVersion}";
 
         _updatingFilters = true;
         var keep = _selectedResourceVersionOption;

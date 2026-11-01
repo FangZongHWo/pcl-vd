@@ -5,6 +5,7 @@
   <Application.Resources>
 
     <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    <local:EmptyStringToVisibilityConverter x:Key="EmptyToVis" />
 
     <!-- PCL 调色板：一个主色 + 8 级浓度 -->
     <Color x:Key="AccentColor">#0C7BC0</Color>
