@@ -137,6 +137,9 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
             }
 
             var instanceId = mcVersion;
+            var versionsBefore = Directory.Exists(paths.Versions)
+                ? new HashSet<string>(Directory.GetDirectories(paths.Versions).Select(Path.GetFileName)!, StringComparer.OrdinalIgnoreCase)
+                : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             if (index.Dependencies.TryGetValue("fabric-loader", out var fabricVersion))
             {
@@ -174,6 +177,36 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
                 }
 
                 instanceId = created;
+            }
+
+            // 6) 实例命名：用整合包名，避免「同版本 + 同加载器」的包互相覆盖
+            var desiredName = SanitizeInstanceName(nameHint ?? index.Name);
+            if (!string.IsNullOrEmpty(desiredName) && !versionsBefore.Contains(instanceId))
+            {
+                var finalId = ResolveInstanceId(paths, desiredName, instanceId);
+                if (!string.Equals(finalId, instanceId, StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var from = paths.VersionDir(instanceId);
+                        var to = paths.VersionDir(finalId);
+                        if (Directory.Exists(from) && !Directory.Exists(to))
+                        {
+                            Directory.Move(from, to);
+                            RenameVersionJson(to, instanceId, finalId);
+                            instanceId = finalId;
+                            Log?.Invoke($"实例命名为 {instanceId}");
+                        }
+                        else if (Directory.Exists(to))
+                        {
+                            report.Warnings.Add($"实例 {finalId} 已存在，改用 {instanceId}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        report.Warnings.Add($"实例重命名失败，沿用 {instanceId}：{ex.Message}");
+                    }
+                }
             }
 
             report.InstanceVersionId = instanceId;
@@ -235,6 +268,46 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
         {
             if (localPath is null) { try { File.Delete(temp); } catch { /* 忽略 */ } }
         }
+    }
+
+    /// <summary>把整合包名整理成合法的实例 id。</summary>
+    private static string SanitizeInstanceName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "";
+        var invalid = Path.GetInvalidFileNameChars();
+        var sb = new System.Text.StringBuilder(name.Length);
+        foreach (var ch in name.Trim())
+            sb.Append(Array.IndexOf(invalid, ch) >= 0 ? '-' : ch);
+        var s = sb.ToString().Trim(' ', '.');
+        if (s.Length > 48) s = s[..48].TrimEnd(' ', '.');
+        return s;
+    }
+
+    /// <summary>目标名被占用时加 -2、-3 后缀。</summary>
+    private static string ResolveInstanceId(MinecraftPaths paths, string desired, string autoId)
+    {
+        if (string.Equals(desired, autoId, StringComparison.OrdinalIgnoreCase)) return autoId;
+
+        var candidate = desired;
+        var i = 2;
+        while (Directory.Exists(paths.VersionDir(candidate)))
+            candidate = $"{desired} ({i++})";
+        return candidate;
+    }
+
+    /// <summary>重命名实例目录后，把版本 JSON 的 id 和文件名一起改掉。</summary>
+    private static void RenameVersionJson(string instanceDir, string oldId, string newId)
+    {
+        var oldJson = Path.Combine(instanceDir, oldId + ".json");
+        if (!File.Exists(oldJson)) return;
+
+        var node = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(oldJson));
+        if (node is System.Text.Json.Nodes.JsonObject obj)
+        {
+            obj["id"] = newId;
+            File.WriteAllText(Path.Combine(instanceDir, newId + ".json"), obj.ToJsonString(HttpUtil.JsonOptions));
+        }
+        File.Delete(oldJson);
     }
 
     private static int ExtractOverrides(ZipArchive zip, string instanceDir, List<string> warnings)
