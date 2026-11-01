@@ -23,6 +23,9 @@ public sealed class InstallOptions
 
     /// <summary>调试/冒烟测试用：跳过几百 MB 的资源对象。</summary>
     public bool SkipAssets { get; init; }
+
+    /// <summary>版本隔离：整合包内容装进 versions/&lt;id&gt; 还是 .minecraft 根目录。</summary>
+    public bool Isolated { get; init; } = true;
 }
 
 /// <summary>

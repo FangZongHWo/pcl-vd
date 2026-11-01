@@ -212,6 +212,9 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
             report.InstanceVersionId = instanceId;
             var instanceDir = paths.VersionDir(instanceId);
             Directory.CreateDirectory(instanceDir);
+            // 不隔离时，整合包内容铺到 .minecraft 根目录
+            var contentDir = options.Isolated ? instanceDir : paths.Root;
+            Directory.CreateDirectory(contentDir);
 
             // 4) 下载整合包里的文件
             var files = new List<DownloadFile>();
@@ -220,7 +223,7 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
                 if (f.Env is not null && string.Equals(f.Env.Client, "unsupported", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var target = SafeJoin(instanceDir, f.Path);
+                var target = SafeJoin(contentDir, f.Path);
                 if (target is null)
                 {
                     report.Warnings.Add($"可疑路径，已跳过：{f.Path}");
@@ -248,7 +251,7 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
             }
 
             // 5) overrides
-            report.OverridesExtracted = ExtractOverrides(zip, instanceDir, report.Warnings);
+            report.OverridesExtracted = ExtractOverrides(zip, contentDir, report.Warnings);
 
             // 6) 留个包名，方便 UI 展示
             File.WriteAllText(Path.Combine(instanceDir, ".mcdl-modpack.json"),

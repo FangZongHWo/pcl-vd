@@ -59,14 +59,14 @@ public sealed class ResourceInstaller(ModrinthClient client)
 
             var folder = instance.FolderFor(item.Type);
             var target = Path.Combine(folder, SanitizeFileName(file.Filename));
-            var relative = Path.GetRelativePath(instance.InstanceDir, target);
+            var relative = Path.GetRelativePath(instance.GameDir, target);
 
             var existing = state.Installed.FirstOrDefault(r => r.ProjectId == item.Project.Id);
             var replacing = existing is not null && !string.Equals(existing.VersionId, item.Version.Id);
 
             if (existing is not null)
             {
-                var oldPath = Path.Combine(instance.InstanceDir, existing.RelativePath);
+                var oldPath = Path.Combine(instance.GameDir, existing.RelativePath);
                 if (File.Exists(oldPath) && !string.Equals(oldPath, target, StringComparison.OrdinalIgnoreCase))
                     TryDelete(oldPath);
                 state.Installed.Remove(existing);

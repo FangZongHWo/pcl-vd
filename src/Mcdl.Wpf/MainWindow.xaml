@@ -435,6 +435,7 @@
                       <RowDefinition Height="Auto" />
                       <RowDefinition Height="Auto" />
                       <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="数据源" Style="{StaticResource Body}"
@@ -457,6 +458,14 @@
                                VerticalAlignment="Center" />
                     <CheckBox Grid.Row="2" Grid.Column="1" Content="优先使用 BMCLAPI 国内镜像" FontSize="13"
                               IsChecked="{Binding UseMirror, Mode=TwoWay}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="版本隔离" Style="{StaticResource Body}"
+                               VerticalAlignment="Center" />
+                    <StackPanel Grid.Row="3" Grid.Column="1">
+                      <CheckBox Content="模组 / 光影 / 资源包装进 versions/&lt;实例&gt;，不同版本互不影响" FontSize="13"
+                                IsChecked="{Binding IsolateVersions, Mode=TwoWay}" />
+                      <TextBlock Text="关掉则装到 .minecraft 根目录，要和启动器的隔离设置保持一致"
+                                 Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
                   </Grid>
                 </StackPanel>
               </Border>

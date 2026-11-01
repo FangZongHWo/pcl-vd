@@ -22,6 +22,7 @@ string? instanceArg = null;
 string? installResource = null;
 string? installPack = null;
 string? importPack = null;
+var noIsolate = false;
 var noAssets = false;
 var kind = SourceKind.Auto;
 var threads = 32;
@@ -42,6 +43,7 @@ for (var i = 0; i < args.Length; i++)
         case "--install-resource": installResource = args[++i]; break;
         case "--install-pack": installPack = args[++i]; break;
         case "--import-pack": importPack = args[++i]; break;
+        case "--no-isolate": noIsolate = true; break;
         case "--source":
             kind = args[++i].ToLowerInvariant() switch
             {
@@ -96,7 +98,7 @@ if (installResource is not null)
     }
 
     var paths0 = new MinecraftPaths(dir);
-    var instance = InstanceContext.TryLoad(paths0, instanceArg, Console.WriteLine);
+    var instance = InstanceContext.TryLoad(paths0, instanceArg, Console.WriteLine, !noIsolate);
     if (instance is null) return 2;
 
     Console.WriteLine($"实例 {instance.VersionId}：MC {instance.MinecraftVersion}" +

@@ -16,14 +16,20 @@ public sealed class InstanceContext
     public string? Loader { get; init; }                // fabric / forge / neoforge / null
     public string? LoaderVersion { get; init; }
 
-    public string Mods => Path.Combine(InstanceDir, "mods");
-    public string ShaderPacks => Path.Combine(InstanceDir, "shaderpacks");
-    public string ResourcePacks => Path.Combine(InstanceDir, "resourcepacks");
-    public string StateFile => Path.Combine(InstanceDir, ".mcdl-resources.json");
+    /// <summary>版本隔离：true = 资源装进 versions/&lt;id&gt;，false = 装进 .minecraft 根目录。</summary>
+    public bool Isolated { get; init; } = true;
 
-    public string FolderFor(ResourceType type) => Path.Combine(InstanceDir, type.Folder());
+    /// <summary>资源的实际落盘根目录（模组、光影、资源包的父目录）。</summary>
+    public string GameDir => Isolated ? InstanceDir : Root;
 
-    public static InstanceContext? TryLoad(MinecraftPaths paths, string versionId, Action<string>? log = null)
+    public string Mods => Path.Combine(GameDir, "mods");
+    public string ShaderPacks => Path.Combine(GameDir, "shaderpacks");
+    public string ResourcePacks => Path.Combine(GameDir, "resourcepacks");
+    public string StateFile => Path.Combine(Isolated ? InstanceDir : Root, ".mcdl-resources.json");
+
+    public string FolderFor(ResourceType type) => Path.Combine(GameDir, type.Folder());
+
+    public static InstanceContext? TryLoad(MinecraftPaths paths, string versionId, Action<string>? log = null, bool isolated = true)
     {
         var jsonPath = paths.VersionJsonPath(versionId);
         if (!File.Exists(jsonPath))
@@ -52,6 +58,7 @@ public sealed class InstanceContext
             MinecraftVersion = mcVersion,
             Root = paths.Root,
             InstanceDir = paths.VersionDir(versionId),
+            Isolated = isolated,
             Loader = loader,
             LoaderVersion = loaderVersion,
         };

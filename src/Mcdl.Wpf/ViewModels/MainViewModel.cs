@@ -192,6 +192,19 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    private bool _isolateVersions = true;
+    /// <summary>版本隔离：资源装进 versions/&lt;id&gt;（true）还是 .minecraft 根目录（false）。</summary>
+    public bool IsolateVersions
+    {
+        get => _isolateVersions;
+        set
+        {
+            if (!Set(ref _isolateVersions, value)) return;
+            OnPropertyChanged(nameof(ResourceTargetText));
+            OnPropertyChanged(nameof(ResourceHint));
+        }
+    }
+
     private string _javaHome = "";
     public string JavaHome
     {
@@ -643,7 +656,7 @@ public sealed class MainViewModel : ObservableObject
     private InstanceContext? ResolveInstance()
     {
         if (SelectedVersion is null) return null;
-        return InstanceContext.TryLoad(new MinecraftPaths(TargetDir), SelectedVersion.Id, AppendLog);
+        return InstanceContext.TryLoad(new MinecraftPaths(TargetDir), SelectedVersion.Id, AppendLog, _isolateVersions);
     }
 
     private ResourceType CurrentResourceType => _selectedResourceType switch
@@ -889,6 +902,7 @@ public sealed class MainViewModel : ObservableObject
             {
                 Source = _sourceKind,
                 MaxThreads = _maxThreads,
+                Isolated = _isolateVersions,
             })
             {
                 Log = s => Ui.Post(() => AppendLog(s)),
@@ -943,6 +957,7 @@ public sealed class MainViewModel : ObservableObject
             {
                 Source = _sourceKind,
                 MaxThreads = _maxThreads,
+                Isolated = _isolateVersions,
             })
             {
                 Log = s => Ui.Post(() => AppendLog(s)),
@@ -1007,7 +1022,7 @@ public sealed class MainViewModel : ObservableObject
         try
         {
             var paths = new MinecraftPaths(dir);
-            var options = new InstallOptions { Source = _sourceKind, MaxThreads = _maxThreads };
+            var options = new InstallOptions { Source = _sourceKind, MaxThreads = _maxThreads, Isolated = _isolateVersions };
             void OnLog(string s) => Ui.Post(() => AppendLog(s));
             void OnProgress(string phase, DownloadProgress p) => Ui.Post(() => ApplyProgress(phase, p));
 
