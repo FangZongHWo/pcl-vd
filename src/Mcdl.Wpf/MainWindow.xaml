@@ -198,8 +198,6 @@
                       <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding JavaOptions}"
                                 SelectedItem="{Binding SelectedJava, Mode=TwoWay}" />
 
-                      <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SourceHint}"
-                                 Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" />
                     </Grid>
                   </StackPanel>
                 </Border>

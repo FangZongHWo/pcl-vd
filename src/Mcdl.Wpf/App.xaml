@@ -99,33 +99,12 @@
     </Style>
 
     <!-- 主按钮 -->
+    <!-- 主按钮：同 MyButton 描边结构，颜色用主题蓝（Highlight） -->
     <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
-      <Setter Property="Height" Value="32" />
-      <Setter Property="Foreground" Value="White" />
-      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="Foreground" Value="{StaticResource ColorBrush2}" />
       <Setter Property="Background" Value="{StaticResource ColorBrush2}" />
-      <Setter Property="BorderBrush" Value="{StaticResource ColorBrush2}" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="Button">
-            <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
-                    CornerRadius="3" SnapsToDevicePixels="True">
-              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Margin="{TemplateBinding Padding}" />
-            </Border>
-            <ControlTemplate.Triggers>
-              <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="Bd" Property="Background" Value="{StaticResource ColorBrush3}" />
-              </Trigger>
-              <Trigger Property="IsEnabled" Value="False">
-                <Setter TargetName="Bd" Property="Background" Value="#C9CDD2" />
-                <Setter TargetName="Bd" Property="BorderBrush" Value="#C9CDD2" />
-              </Trigger>
-            </ControlTemplate.Triggers>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
+      <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <!-- 标题栏胶囊标签：高 27、圆角 13.5 -->
