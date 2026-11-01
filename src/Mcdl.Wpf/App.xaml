@@ -213,13 +213,13 @@
                                 ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                 ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
               <Popup x:Name="PART_Popup" SnapsToDevicePixels="True" VerticalOffset="-1.5"
-                     AllowsTransparency="True"
+                     AllowsTransparency="False"
                      IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                     Placement="Bottom" PopupAnimation="Fade">
+                     Placement="Bottom" PopupAnimation="None">
                 <Grid x:Name="PanPopup">
                   <Border Background="White" CornerRadius="3" />
                   <Border x:Name="dropDownBorder" Background="White" CornerRadius="3" BorderBrush="{TemplateBinding BorderBrush}"
-                          BorderThickness="1" Width="{TemplateBinding Width}"
+                          BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}"
                           MaxHeight="{TemplateBinding MaxDropDownHeight}">
                     <ScrollViewer x:Name="DropDownScrollViewer" PanningMode="VerticalOnly"
                                   SnapsToDevicePixels="False" ScrollViewer.CanContentScroll="False"
@@ -338,32 +338,44 @@
       </Setter>
     </Style>
 
-    <!-- 滚动条：6px 细条 -->
+    <!-- ScrollBar / Thumb：取自 PCL Application.xaml，颜色由 Foreground 决定 -->
+    <Style x:Key="MyThumb" TargetType="Thumb">
+      <Setter Property="Stylus.IsPressAndHoldEnabled" Value="False" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Thumb">
+            <Border Background="{StaticResource ColorBrushSemiTransparent}" SnapsToDevicePixels="True">
+              <Border Background="{TemplateBinding Foreground}" CornerRadius="3" Margin="2" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <Style TargetType="ScrollBar">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Width" Value="6" />
+      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="Stylus.IsPressAndHoldEnabled" Value="False" />
+      <Setter Property="OverridesDefaultStyle" Value="True" />
+      <Setter Property="SnapsToDevicePixels" Value="True" />
+      <Setter Property="UseLayoutRounding" Value="True" />
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Foreground" Value="#B8BCC0" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="ScrollBar">
-            <Grid Background="Transparent" Width="6">
+            <Border CornerRadius="2">
               <Track x:Name="PART_Track" IsDirectionReversed="True">
+                <Track.DecreaseRepeatButton>
+                  <RepeatButton Command="{x:Static ScrollBar.PageUpCommand}" Opacity="0" />
+                </Track.DecreaseRepeatButton>
+                <Track.IncreaseRepeatButton>
+                  <RepeatButton Command="{x:Static ScrollBar.PageDownCommand}" Opacity="0" />
+                </Track.IncreaseRepeatButton>
                 <Track.Thumb>
-                  <Thumb>
-                    <Thumb.Template>
-                      <ControlTemplate TargetType="Thumb">
-                        <Border x:Name="Th" Background="#C4C9CE" CornerRadius="3" Width="6" />
-                        <ControlTemplate.Triggers>
-                          <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Th" Property="Background" Value="#9AA2AA" />
-                            <Setter TargetName="Th" Property="Width" Value="8" />
-                          </Trigger>
-                        </ControlTemplate.Triggers>
-                      </ControlTemplate>
-                    </Thumb.Template>
-                  </Thumb>
+                  <Thumb Style="{StaticResource MyThumb}" Foreground="{TemplateBinding Foreground}" />
                 </Track.Thumb>
               </Track>
-            </Grid>
+            </Border>
           </ControlTemplate>
         </Setter.Value>
       </Setter>
