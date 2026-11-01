@@ -60,7 +60,6 @@
             <Border Background="{StaticResource ColorBrushSemiTransparent}" RenderTransformOrigin="0.5,0.5">
               <Border x:Name="PanFore" CornerRadius="3" BorderThickness="1"
                       BorderBrush="{TemplateBinding Background}"
-                      Background="{StaticResource ColorBrushHalfWhite}"
                       RenderTransformOrigin="0.5,0.5" SnapsToDevicePixels="True">
                 <Border.RenderTransform>
                   <ScaleTransform x:Name="Sc" ScaleX="1" ScaleY="1" />
@@ -71,8 +70,11 @@
               </Border>
             </Border>
             <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="False">
+                <Setter TargetName="PanFore" Property="Background" Value="{StaticResource ColorBrushHalfWhite}" />
+              </Trigger>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="PanFore" Property="Background" Value="White" />
+                <Setter TargetName="PanFore" Property="Background" Value="{StaticResource ColorBrush7}" />
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
                 <Trigger.EnterActions>
