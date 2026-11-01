@@ -394,19 +394,19 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="ListBoxItem">
-            <Grid>
-              <Border x:Name="Bd" Background="Transparent" CornerRadius="3" SnapsToDevicePixels="True">
-                <ContentPresenter />
+            <Grid Height="42" Background="Transparent">
+              <Border x:Name="Bd" Background="Transparent" SnapsToDevicePixels="True">
+                <ContentPresenter Margin="4,0,4,0" />
               </Border>
-              <Border x:Name="Bar" Width="3" HorizontalAlignment="Left" Margin="1,4" CornerRadius="1.5"
+              <Border x:Name="Bar" Width="2" HorizontalAlignment="Left"
                       Background="{StaticResource ColorBrush2}" Visibility="Collapsed" />
             </Grid>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="Bd" Property="Background" Value="{StaticResource ColorBrush8}" />
+                <Setter TargetName="Bd" Property="Background" Value="White" />
               </Trigger>
               <Trigger Property="IsSelected" Value="True">
-                <Setter TargetName="Bd" Property="Background" Value="{StaticResource ColorBrush7}" />
+                <Setter TargetName="Bd" Property="Background" Value="White" />
                 <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
               </Trigger>
             </ControlTemplate.Triggers>

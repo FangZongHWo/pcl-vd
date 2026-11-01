@@ -132,7 +132,7 @@
                        SelectedItem="{Binding SelectedVersion, Mode=TwoWay}">
                 <ListBox.ItemTemplate>
                   <DataTemplate>
-                    <Grid Height="30" Margin="8,0">
+                    <Grid Height="42" Margin="8,0">
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
