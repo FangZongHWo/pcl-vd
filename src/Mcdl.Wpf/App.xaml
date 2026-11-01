@@ -59,13 +59,34 @@
             <Border x:Name="Bd" Background="{TemplateBinding Background}"
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="3" SnapsToDevicePixels="True">
+                    CornerRadius="3" SnapsToDevicePixels="True" RenderTransformOrigin="0.5,0.5">
+              <Border.RenderTransform>
+                <ScaleTransform x:Name="Sc" ScaleX="1" ScaleY="1" />
+              </Border.RenderTransform>
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
                                 Margin="{TemplateBinding Padding}" />
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
                 <Setter TargetName="Bd" Property="Background" Value="{StaticResource ColorBrush8}" />
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Trigger.EnterActions>
+                  <BeginStoryboard>
+                    <Storyboard>
+                      <DoubleAnimation Storyboard.TargetName="Sc" Storyboard.TargetProperty="ScaleX" To="0.96" Duration="0:0:0.07" />
+                      <DoubleAnimation Storyboard.TargetName="Sc" Storyboard.TargetProperty="ScaleY" To="0.96" Duration="0:0:0.07" />
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                  <BeginStoryboard>
+                    <Storyboard>
+                      <DoubleAnimation Storyboard.TargetName="Sc" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.12" />
+                      <DoubleAnimation Storyboard.TargetName="Sc" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.12" />
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.ExitActions>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -259,7 +280,13 @@
                   <Thumb>
                     <Thumb.Template>
                       <ControlTemplate TargetType="Thumb">
-                        <Border Background="#C4C9CE" CornerRadius="3" Width="6" />
+                        <Border x:Name="Th" Background="#C4C9CE" CornerRadius="3" Width="6" />
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Th" Property="Background" Value="#9AA2AA" />
+                            <Setter TargetName="Th" Property="Width" Value="8" />
+                          </Trigger>
+                        </ControlTemplate.Triggers>
                       </ControlTemplate>
                     </Thumb.Template>
                   </Thumb>
@@ -284,15 +311,20 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="ListBoxItem">
-            <Border x:Name="Bd" Background="Transparent" CornerRadius="3" SnapsToDevicePixels="True">
-              <ContentPresenter />
-            </Border>
+            <Grid>
+              <Border x:Name="Bd" Background="Transparent" CornerRadius="3" SnapsToDevicePixels="True">
+                <ContentPresenter />
+              </Border>
+              <Border x:Name="Bar" Width="3" HorizontalAlignment="Left" Margin="1,4" CornerRadius="1.5"
+                      Background="{StaticResource ColorBrush2}" Visibility="Collapsed" />
+            </Grid>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
                 <Setter TargetName="Bd" Property="Background" Value="{StaticResource ColorBrush8}" />
               </Trigger>
               <Trigger Property="IsSelected" Value="True">
                 <Setter TargetName="Bd" Property="Background" Value="{StaticResource ColorBrush7}" />
+                <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -306,5 +338,33 @@
       <Setter Property="BorderThickness" Value="0,0,1,0" />
     </Style>
 
+      <!-- 加载转圈：旋转弧线 -->
+    <Style x:Key="LoadingRing" TargetType="Path">
+      <Setter Property="Width" Value="14" />
+      <Setter Property="Height" Value="14" />
+      <Setter Property="Stretch" Value="Uniform" />
+      <Setter Property="Stroke" Value="{StaticResource ColorBrush2}" />
+      <Setter Property="StrokeThickness" Value="2.2" />
+      <Setter Property="StrokeDashArray" Value="12 5" />
+      <Setter Property="StrokeStartLineCap" Value="Round" />
+      <Setter Property="StrokeEndLineCap" Value="Round" />
+      <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+      <Setter Property="Data" Value="M 7,1 A 6,6 0 1 1 6.9,1" />
+      <Setter Property="RenderTransform">
+        <Setter.Value>
+          <RotateTransform Angle="0" />
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+          <BeginStoryboard>
+            <Storyboard RepeatBehavior="Forever">
+              <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                               From="0" To="360" Duration="0:0:0.9" />
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+      </Style.Triggers>
+    </Style>
   </Application.Resources>
 </Application>
