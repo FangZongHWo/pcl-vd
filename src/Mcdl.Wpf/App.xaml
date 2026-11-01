@@ -186,53 +186,123 @@
       <Setter Property="Background" Value="White" />
     </Style>
     <!-- 下拉框：平边框 + 3px 圆角 + 白色弹层（PCL 风格） -->
+    <!-- ComboBox / ComboBoxItem / 箭头：模板取自 PCL Application.xaml，仅替换资源键 -->
     <Style TargetType="ComboBox">
-      <Setter Property="MinHeight" Value="28" />
-      <Setter Property="FontSize" Value="13" />
-      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="OverridesDefaultStyle" Value="True" />
+      <Setter Property="SnapsToDevicePixels" Value="True" />
       <Setter Property="Foreground" Value="{StaticResource ColorBrush1}" />
+      <Setter Property="Background" Value="White" />
+      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="MaxDropDownHeight" Value="320" />
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="ComboBox">
             <Grid>
-              <ToggleButton Focusable="False" ClickMode="Press"
-                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
-                <ToggleButton.Template>
-                  <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="Bd" Background="White" BorderBrush="{StaticResource BorderBrush2}"
-                            BorderThickness="1" CornerRadius="3" SnapsToDevicePixels="True">
-                      <Grid>
-                        <ContentPresenter Margin="7,0,22,0" VerticalAlignment="Center" HorizontalAlignment="Left"
-                                          Content="{Binding SelectionBoxItem, RelativeSource={RelativeSource AncestorType=ComboBox}}" />
-                        <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0"
-                              Data="M0,0 L4.5,4.5 L9,0" Stroke="#6A6A6A" StrokeThickness="1.3" />
-                      </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                      <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource ColorBrush5}" />
-                      </Trigger>
-                      <Trigger Property="IsChecked" Value="True">
-                        <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource ColorBrush2}" />
-                      </Trigger>
-                    </ControlTemplate.Triggers>
-                  </ControlTemplate>
-                </ToggleButton.Template>
-              </ToggleButton>
-              <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom"
-                     AllowsTransparency="True" PopupAnimation="Fade" StaysOpen="False">
-                <Border Background="White" BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1"
-                        CornerRadius="3" MinWidth="{TemplateBinding ActualWidth}"
-                        MaxHeight="{TemplateBinding MaxDropDownHeight}" Margin="0,2,0,6">
-                  <Border.Effect>
-                    <DropShadowEffect BlurRadius="4" ShadowDepth="2" Opacity="0.4" Color="#000000" />
-                  </Border.Effect>
-                  <ScrollViewer>
-                    <StackPanel IsItemsHost="True" Margin="2" />
-                  </ScrollViewer>
-                </Border>
+              <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="3"
+                      BorderThickness="1" BorderBrush="{TemplateBinding Foreground}" />
+              <ToggleButton Margin="0,0,1.5,0" Foreground="{TemplateBinding Foreground}" IsTabStop="False"
+                            SnapsToDevicePixels="False" Focusable="False"
+                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                            ClickMode="Press" />
+              <ContentPresenter x:Name="PART_Content" Margin="8.5,0,21.5,0" IsHitTestVisible="False"
+                                VerticalAlignment="Center"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
+              <Popup x:Name="PART_Popup" SnapsToDevicePixels="True" VerticalOffset="-1.5"
+                     AllowsTransparency="True"
+                     IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                     Placement="Bottom" PopupAnimation="Fade">
+                <Grid x:Name="PanPopup">
+                  <Border Background="White" CornerRadius="3" />
+                  <Border x:Name="dropDownBorder" Background="White" CornerRadius="3" BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="1" Width="{TemplateBinding Width}"
+                          MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                    <ScrollViewer x:Name="DropDownScrollViewer" PanningMode="VerticalOnly"
+                                  SnapsToDevicePixels="False" ScrollViewer.CanContentScroll="False"
+                                  VerticalScrollBarVisibility="Auto">
+                      <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
+                    </ScrollViewer>
+                  </Border>
+                </Grid>
               </Popup>
             </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="HasItems" Value="false">
+                <Setter Property="Height" TargetName="dropDownBorder" Value="26" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+      <Setter Property="OverridesDefaultStyle" Value="True" />
+      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ComboBoxItem">
+            <Border x:Name="ItemBorder" Padding="6,4" SnapsToDevicePixels="True"
+                    Background="{TemplateBinding Background}">
+              <ContentPresenter />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource ColorBrush8}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- 下拉箭头：PCL 的 ToggleButton 模板（展开旋转 180°，CircleEase 0.2s） -->
+    <Style TargetType="ToggleButton">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ToggleButton">
+            <Border Background="Transparent">
+              <Path x:Name="path" Width="15" RenderTransformOrigin="0.3,0.5" HorizontalAlignment="Right"
+                    Data="M1,1L4.5,4.5L8,1" StrokeThickness="1.5" Stroke="{TemplateBinding Foreground}"
+                    VerticalAlignment="Center">
+                <Path.RenderTransform>
+                  <RotateTransform />
+                </Path.RenderTransform>
+              </Path>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsChecked" Value="True">
+                <Trigger.EnterActions>
+                  <BeginStoryboard>
+                    <Storyboard Storyboard.TargetName="path"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
+                      <DoubleAnimation To="180" Duration="0:0:0.2">
+                        <DoubleAnimation.EasingFunction>
+                          <CircleEase EasingMode="EaseOut" />
+                        </DoubleAnimation.EasingFunction>
+                      </DoubleAnimation>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                  <BeginStoryboard>
+                    <Storyboard Storyboard.TargetName="path"
+                                Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
+                      <DoubleAnimation To="0" Duration="0:0:0.2">
+                        <DoubleAnimation.EasingFunction>
+                          <CircleEase EasingMode="EaseOut" />
+                        </DoubleAnimation.EasingFunction>
+                      </DoubleAnimation>
+                    </Storyboard>
+                  </BeginStoryboard>
+                </Trigger.ExitActions>
+              </Trigger>
+            </ControlTemplate.Triggers>
           </ControlTemplate>
         </Setter.Value>
       </Setter>
