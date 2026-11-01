@@ -86,6 +86,8 @@ public partial class MainWindow : Window
         catch { /* 没有默认浏览器就算了 */ }
     }
 
+    private void OnOpenRepoClick(object sender, RoutedEventArgs e) => OpenUrl("https://github.com/FangZongHWo/pcl-vd");
+
     private void OnOpenPclRepoClick(object sender, RoutedEventArgs e) => OpenUrl("https://github.com/Meloong-Git/PCL/");
 
     private void OnOpenSponsorClick(object sender, RoutedEventArgs e) => OpenUrl("https://meloong.com/afd/a/LTCat");
