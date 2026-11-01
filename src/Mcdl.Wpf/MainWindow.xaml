@@ -326,38 +326,70 @@
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
-              <Border Grid.Column="0" Width="52" Height="52" CornerRadius="3" Background="{StaticResource ColorBrush8}"
-                      VerticalAlignment="Top">
-                <Grid>
-                  <TextBlock Text="?" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource ColorBrush2}"
-                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                  <Image Source="{Binding ResourceIcon}" Stretch="UniformToFill"
-                         Visibility="{Binding HasResourceIcon, Converter={StaticResource BoolToVis}}" />
-                </Grid>
-              </Border>
-              <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                <TextBlock Style="{StaticResource H1}" Text="{Binding ResourceTitle}" TextWrapping="Wrap" />
-                <TextBlock Text="{Binding ResourceSubtitle}" FontSize="11" TextWrapping="Wrap"
-                           Foreground="{StaticResource ColorBrushGray4}" Margin="0,3,0,0" />
-              </StackPanel>
-            </Grid>
+            <!-- 资源信息卡 -->
+            <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource BorderBrush2}"
+                    BorderThickness="1" CornerRadius="3" Padding="16,14">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Width="52" Height="52" CornerRadius="3"
+                        Background="{StaticResource ColorBrush8}" VerticalAlignment="Top">
+                  <Grid>
+                    <TextBlock Text="?" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource ColorBrush2}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <Image Source="{Binding ResourceIcon}" Stretch="UniformToFill"
+                           Visibility="{Binding HasResourceIcon, Converter={StaticResource BoolToVis}}" />
+                  </Grid>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                  <TextBlock Style="{StaticResource H1}" Text="{Binding ResourceTitle}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding ResourceSubtitle}" FontSize="11" TextWrapping="Wrap"
+                             Foreground="{StaticResource ColorBrushGray4}" Margin="0,4,0,0" />
+                </StackPanel>
+              </Grid>
+            </Border>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
-              <StackPanel Width="560" HorizontalAlignment="Left">
-                <TextBlock Style="{StaticResource H2}" Text="安装到" />
-                <TextBlock Text="{Binding ResourceTargetText}" FontSize="11" TextWrapping="Wrap"
-                           Foreground="{StaticResource ColorBrushGray4}" Margin="0,0,0,10" />
+            <ScrollViewer Grid.Row="1" Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
+              <StackPanel>
+                <!-- 安装选项卡 -->
+                <Border Background="White" BorderBrush="{StaticResource BorderBrush2}"
+                        BorderThickness="1" CornerRadius="3" Padding="16,14">
+                  <StackPanel>
+                    <TextBlock Style="{StaticResource H2}" Text="安装选项" Margin="0,0,0,12" />
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="86" />
+                        <ColumnDefinition Width="*" />
+                      </Grid.ColumnDefinitions>
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                      </Grid.RowDefinitions>
 
-                <TextBlock Style="{StaticResource H2}" Text="选择版本" />
-                <ComboBox ItemsSource="{Binding ResourceVersions}" SelectedItem="{Binding SelectedResourceVersion, Mode=TwoWay}"
-                          IsEnabled="{Binding HasResourceVersions}" Margin="0,0,0,10" />
+                      <TextBlock Grid.Row="0" Grid.Column="0" Text="安装到" Style="{StaticResource Body}"
+                                 VerticalAlignment="Center" Margin="0,0,0,8" />
+                      <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ResourceTargetText}"
+                                 Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,0,8" />
 
-                <Border Background="{StaticResource ColorBrush8}" CornerRadius="3" Padding="10,8" Margin="0,0,0,8"
+                      <TextBlock Grid.Row="1" Grid.Column="0" Text="版本" Style="{StaticResource Body}"
+                                 VerticalAlignment="Center" Margin="0,0,0,8" />
+                      <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ResourceVersions}"
+                                SelectedItem="{Binding SelectedResourceVersion, Mode=TwoWay}"
+                                IsEnabled="{Binding HasResourceVersions}" Margin="0,0,0,8" />
+
+                      <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ResourceHint}"
+                                 Style="{StaticResource Muted}" TextWrapping="Wrap" />
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <!-- 进度卡 -->
+                <Border Background="White" BorderBrush="{StaticResource BorderBrush2}"
+                        BorderThickness="1" CornerRadius="3" Padding="16,14" Margin="0,10,0,0"
                         Visibility="{Binding IsResourceBusy, Converter={StaticResource BoolToVis}}">
                   <StackPanel>
                     <Grid>
@@ -365,28 +397,26 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                       </Grid.ColumnDefinitions>
-                      <TextBlock Grid.Column="0" Text="{Binding ResourceProgressText}" FontSize="11" TextTrimming="CharacterEllipsis" />
-                      <TextBlock Grid.Column="1" Text="{Binding ResourceSpeedText}" FontSize="11"
+                      <TextBlock Grid.Column="0" Text="{Binding ResourceProgressText}" FontSize="12"
+                                 TextTrimming="CharacterEllipsis" />
+                      <TextBlock Grid.Column="1" Text="{Binding ResourceSpeedText}" FontSize="12"
                                  Foreground="{StaticResource ColorBrushGray4}" Margin="8,0,0,0" />
                     </Grid>
-                    <ProgressBar Height="4" Margin="0,4" Minimum="0" Maximum="1" Value="{Binding ResourceProgressValue}"
-                                 Foreground="{StaticResource ColorBrush2}" />
+                    <ProgressBar Height="6" Margin="0,8,0,0" Minimum="0" Maximum="1"
+                                 Value="{Binding ResourceProgressValue}" Foreground="{StaticResource ColorBrush2}" />
                   </StackPanel>
                 </Border>
-
-                <TextBlock Text="{Binding ResourceHint}" FontSize="11" TextWrapping="Wrap"
-                           Foreground="{StaticResource ColorBrushGray4}" />
               </StackPanel>
             </ScrollViewer>
 
-            <StackPanel Grid.Row="2" Width="560" HorizontalAlignment="Left" Margin="0,12,0,0">
+            <StackPanel Grid.Row="2" Margin="0,10,0,0">
               <Button Style="{StaticResource PrimaryButton}" Content="{Binding InstallResourceButtonText}"
-                      Command="{Binding InstallResourceCommand}" />
-              <TextBlock Style="{StaticResource Muted}" Text="{Binding ResourceStatus}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                      Command="{Binding InstallResourceCommand}" Height="36" />
+              <TextBlock Style="{StaticResource Muted}" Text="{Binding ResourceStatus}"
+                         TextWrapping="Wrap" Margin="0,8,0,0" />
             </StackPanel>
           </Grid>
         </Grid>
-
         <!-- 关于页 -->
         <Border x:Name="PageAbout" Padding="18"
                 Visibility="{Binding IsAboutTab, Converter={StaticResource BoolToVis}}">

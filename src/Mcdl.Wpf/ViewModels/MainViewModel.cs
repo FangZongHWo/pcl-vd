@@ -516,6 +516,7 @@ public sealed class MainViewModel : ObservableObject
         "跟随实例", "全部加载器", "Fabric", "Forge", "NeoForge", "Quilt",
     };
 
+    private bool _updatingFilters;
     private string _selectedResourceVersionOption = "跟随实例";
     public string SelectedResourceVersionOption
     {
@@ -523,6 +524,7 @@ public sealed class MainViewModel : ObservableObject
         set
         {
             if (!Set(ref _selectedResourceVersionOption, value)) return;
+            if (_updatingFilters) return;
             _ = SearchResourcesAsync();
         }
     }
@@ -534,6 +536,7 @@ public sealed class MainViewModel : ObservableObject
         set
         {
             if (!Set(ref _selectedResourceLoaderOption, value)) return;
+            if (_updatingFilters) return;
             _ = SearchResourcesAsync();
         }
     }
@@ -581,6 +584,7 @@ public sealed class MainViewModel : ObservableObject
             ? "跟随实例"
             : $"跟随实例（{instance.MinecraftVersion}）";
 
+        _updatingFilters = true;
         var keep = _selectedResourceVersionOption;
         var wasFollowing = keep.StartsWith("跟随", StringComparison.Ordinal);
 
@@ -597,6 +601,7 @@ public sealed class MainViewModel : ObservableObject
 
         _selectedResourceVersionOption = match ?? followLabel;
         OnPropertyChanged(nameof(SelectedResourceVersionOption));
+        _updatingFilters = false;
     }
 
     private InstanceContext? ResolveInstance()
