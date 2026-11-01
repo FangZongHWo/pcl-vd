@@ -181,10 +181,6 @@
                         <RowDefinition Height="Auto" />
                       </Grid.RowDefinitions>
 
-                      <TextBlock Grid.Row="0" Grid.Column="0" Text="数据源" Style="{StaticResource Body}"
-                                 VerticalAlignment="Center" Margin="0,0,0,8" />
-                      <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Sources}"
-                                SelectedItem="{Binding SelectedSource, Mode=TwoWay}" Margin="0,0,0,8" />
 
                       <TextBlock Grid.Row="1" Grid.Column="0" Text="加载器" Style="{StaticResource Body}"
                                  VerticalAlignment="Center" Margin="0,0,0,8" />
@@ -482,8 +478,15 @@
                                VerticalAlignment="Center" Margin="0,0,0,10" />
                     <TextBox Grid.Row="0" Grid.Column="1" x:Name="PathBox" Text="{Binding TargetDir, Mode=TwoWay}"
                              VerticalAlignment="Center" Margin="0,0,0,10" />
-                    <Button Grid.Row="0" Grid.Column="2" Content="浏览…" Style="{StaticResource FlatButton}"
-                            Margin="8,0,0,10" Click="OnBrowseClick" VerticalAlignment="Center" />
+                    <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource FlatButton}"
+                            Margin="8,0,0,10" Click="OnBrowseClick" VerticalAlignment="Center">
+                      <StackPanel Orientation="Horizontal">
+                        <Path Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center"
+                              Fill="{StaticResource ColorBrush3}"
+                              Data="M889.018182 418.909091H884.363636V316.509091a93.090909 93.090909 0 0 0-99.607272-89.832727h-302.545455l-93.090909-76.334546A46.545455 46.545455 0 0 0 358.865455 139.636364H146.152727A93.090909 93.090909 0 0 0 46.545455 229.469091V837.818182a46.545455 46.545455 0 0 0 46.545454 46.545454 46.545455 46.545455 0 0 0 16.756364-3.258181 109.381818 109.381818 0 0 0 25.134545 3.258181h586.472727a85.178182 85.178182 0 0 0 87.04-63.301818l163.374546-302.545454a46.545455 46.545455 0 0 0 5.585454-21.876364A82.385455 82.385455 0 0 0 889.018182 418.909091z m-744.727273-186.181818h198.283636l93.09091 76.334545a46.545455 46.545455 0 0 0 29.323636 10.705455h319.301818a12.101818 12.101818 0 0 1 6.516364 0V418.909091H302.545455a85.178182 85.178182 0 0 0-87.04 63.301818L139.636364 622.778182V232.727273a19.549091 19.549091 0 0 1 6.516363 0z m578.094546 552.029091a27.461818 27.461818 0 0 0-2.792728 6.516363H154.530909l147.083636-272.290909a27.461818 27.461818 0 0 0 2.792728-6.981818h565.061818z" />
+                        <TextBlock Text="浏览…" Margin="5,0,0,0" VerticalAlignment="Center" />
+                      </StackPanel>
+                    </Button>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Java 路径" Style="{StaticResource Body}"
                                VerticalAlignment="Center" />
@@ -600,9 +603,17 @@
           </Grid.ColumnDefinitions>
           <TextBlock Grid.Column="0" Text="{Binding FooterText}" FontSize="11"
                      Foreground="{StaticResource ColorBrushGray4}" VerticalAlignment="Center" />
-          <Button Grid.Column="1" Content="日志" Command="{Binding ToggleLogCommand}"
+          <Button Grid.Column="1" Command="{Binding ToggleLogCommand}"
                   Background="Transparent" BorderThickness="0" Foreground="{StaticResource ColorBrush2}"
-                  FontSize="12" Cursor="Hand" />
+                  FontSize="12" Cursor="Hand">
+            <StackPanel Orientation="Horizontal">
+              <Path Width="12" Height="12" Stretch="Uniform" VerticalAlignment="Center"
+                    Fill="{StaticResource ColorBrush2}"
+                    Data="M384 128h640v128H384zM160 192m-96 0a96 96 0 1 0 192 0 96 96 0 1 0-192 0M384 448h640v128H384zM160 512m-96 0a96 96 0 1 0 192 0 96 96 0 1 0-192 0M384 768h640v128H384zM160 832m-96 0a96 96 0 1 0 192 0 96 96 0 1 0-192 0" />
+              <TextBlock Text="日志" Margin="5,0,0,0" VerticalAlignment="Center"
+                         Foreground="{StaticResource ColorBrush2}" FontSize="12" />
+            </StackPanel>
+          </Button>
         </Grid>
       </Border>
     </Grid>
