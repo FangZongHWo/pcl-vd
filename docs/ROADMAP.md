@@ -153,3 +153,74 @@
 1. Avalonia 工程（`src/Mcdl.App`）保留还是归档？
 2. 阶段 4 的「设置」页要放哪些项？（建议：数据源、下载线程数、Java 路径、镜像开关）
 3. 是否要发 GitHub Release（含 68.9 MB 的 exe）？
+
+---
+
+## 六、阶段 8：整合包导入（规划，未实施）
+
+现状：只能从 Modrinth 搜索后在线安装；三种导入路径都没有。
+
+### 8.1 本地 `.mrpack` 导入（1 天）
+
+**现状代码**（`ModpackInstaller.InstallAsync`）是一条直线：
+下包 → 解压读 `modrinth.index.json` → 装原版 → 装加载器 → 下 files → 铺 overrides → 写 `.mcdl-modpack.json`。
+第 2 步之后的逻辑对"本地文件"完全通用，只有第 1 步（下包）绑死了 Modrinth。
+
+**改动**
+- 把 `InstallAsync(pack, version, ct)` 拆成：`EnsureArchiveAsync(...)`（下载，只有线上安装走）+ `InstallFromArchiveAsync(string mrpackPath, string? instanceName, ct)`
+- 线上安装 = `EnsureArchiveAsync` → `InstallFromArchiveAsync`；本地导入 = 直接 `InstallFromArchiveAsync`
+- 实例名：默认取 `index.name`（去非法字符），冲突时加 `-2`；UI 允许用户改名
+- 已存在同名实例 → 提示"覆盖 / 换名 / 取消"
+
+**UI**
+- 资源页左栏顶部加「导入 .mrpack…」按钮 → 文件选择器（`.mrpack`）
+- 进度复用现有 `ResourceProgressValue`
+
+**验收**：拿一个手工下载的 `.mrpack`（如 Fabulously Optimized）导入，实例目录内容与线上安装完全一致；覆盖同名实例时二次确认。
+
+### 8.2 拖拽导入（0.25 天，与 8.1 共用逻辑）
+
+- `Window.AllowDrop="True"`，`DragOver` 校验扩展名（`.mrpack` / `.zip`）并给视觉反馈（整窗高亮边框）
+- `Drop` → 按扩展名分发到 8.1 或 8.3
+- 多个文件时只取第一个，其余提示忽略
+
+**验收**：把 `.mrpack` 拖进窗口任意位置即开始导入；拖不支持的格式时有明确提示且不进入导入。
+
+### 8.3 CurseForge `.zip` 整合包（1.5–2 天）
+
+**格式差异**：`manifest.json` 里是 `{ minecraft: { version, modLoaders: [{ id: "forge-47.2.0" }] }, files: [{ projectID, fileID }] }`，
+只有 ID，没有下载地址；真实地址要查 CurseForge API，且 CDN 链接有时效。
+
+**分两档做**
+
+档 A（无 key，1 天）
+- 解析 `manifest.json`，装对应原版 + 加载器（从 `modLoaders[0].id` 拆出 forge/fabric/neoforge 与版本）
+- 铺 `overrides/`
+- 生成**缺件清单**：把 `projectID/fileID` 列表写进实例目录的 `missing-mods.txt`，并在 UI 给出可点击的 CurseForge 页面链接
+
+档 B（有 key，+0.5–1 天）
+- 设置页加「CurseForge API Key」输入（存本地配置，不写进仓库）
+- 用 `/v1/mods/{id}/files/{fileId}` 批量取真实下载地址 → 走现成的分段下载器
+- 限流与 403 要处理（CF API 对无 key 请求直接拒绝）
+
+**验收**：档 A 导入一个 CF 整合包后，实例能列出缺失模组清单；档 B 能完整装齐。
+
+### 8.4 风险与边界
+
+| 风险 | 处理 |
+|---|---|
+| 整合包里 `env.client = "unsupported"` 的文件 | 跳过，不下载（`MrpackEnv` 已解析，需确认逻辑生效） |
+| 大包（数百 MB） | 复用分段下载器与现有进度回调，不另写下载 |
+| 路径含中文/空格 | `SafeJoin` 已有，补一个带空格路径的回归测试 |
+| 实例名冲突 | 8.1 的三选一提示 |
+| CF 的 CDN 链接失效 | 下载失败时降级为"记入缺件清单"，不整包失败 |
+
+### 8.5 工时汇总
+
+| 子项 | 工时 |
+|---|---|
+| 8.1 本地 mrpack | 1.0 天 |
+| 8.2 拖拽 | 0.25 天 |
+| 8.3 CF 档 A（无 key） | 1.0 天 |
+| 8.3 CF 档 B（有 key） | 0.75 天 |
+| 合计 | 3.0 天 |
