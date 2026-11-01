@@ -10,3 +10,6 @@ Mcdl-PCL/
 .ref/
 dist/
 PCLVD-UI/
+
+# Avalonia 旧工程：保留在磁盘，但不进仓库
+src/Mcdl.App/
