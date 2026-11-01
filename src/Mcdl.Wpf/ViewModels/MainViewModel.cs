@@ -921,6 +921,60 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>导入本地 .mrpack（由文件选择器或拖放调用）。</summary>
+    public async Task ImportModpackAsync(string archivePath)
+    {
+        if (string.IsNullOrWhiteSpace(archivePath) || !File.Exists(archivePath))
+        {
+            ResourceStatus = "找不到这个文件";
+            return;
+        }
+
+        SwitchTab(1);
+        IsResourceBusy = true;
+        ResourceProgressValue = 0;
+        ResourceStatus = $"正在导入 {Path.GetFileName(archivePath)}…";
+        AppendLog($"===== 导入本地整合包 {archivePath} =====");
+
+        try
+        {
+            var paths = new MinecraftPaths(TargetDir);
+            var installer = new ModpackInstaller(paths, new InstallOptions
+            {
+                Source = _sourceKind,
+                MaxThreads = _maxThreads,
+            })
+            {
+                Log = s => Ui.Post(() => AppendLog(s)),
+                Progress = (phase, p) => Ui.Post(() =>
+                {
+                    ApplyResourceProgress(p);
+                    ResourceSpeedText = phase;
+                }),
+            };
+
+            var report = await Task.Run(() => installer.InstallFromArchiveAsync(archivePath)).ConfigureAwait(true);
+
+            ResourceProgressValue = 1;
+            ResourceStatus = report.Success
+                ? $"导入完成：实例 {report.InstanceVersionId}，下载 {report.FilesDownloaded} 个文件，" +
+                  $"覆盖 {report.OverridesExtracted} 个"
+                : $"导入失败：{string.Join("；", report.Errors.Take(2))}";
+
+            AppendLog(ResourceStatus);
+            foreach (var step in report.Steps) AppendLog("  步骤：" + step);
+            foreach (var warn in report.Warnings.Take(5)) AppendLog("  警告：" + warn);
+        }
+        catch (Exception ex)
+        {
+            ResourceStatus = "导入失败：" + ex.Message;
+            AppendLog(ex.ToString());
+        }
+        finally
+        {
+            IsResourceBusy = false;
+        }
+    }
     private void ApplyResourceProgress(DownloadProgress p)
     {
         ResourceProgressValue = p.TotalBytes > 0 ? Math.Clamp((double)p.DoneBytes / p.TotalBytes, 0, 1) : 0;

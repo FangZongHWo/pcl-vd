@@ -34,31 +34,56 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
     public Action<string>? Log { get; init; }
     public Action<string, DownloadProgress>? Progress { get; init; }
 
-    public async Task<ModpackInstallReport> InstallAsync(
+    /// <summary>从 Modrinth 在线安装（先下包再装）。</summary>
+    public Task<ModpackInstallReport> InstallAsync(
         ModrinthProject pack,
         ModrinthVersion version,
         CancellationToken ct = default)
+        => InstallCoreAsync(pack, version, null, ct);
+
+    /// <summary>从本地 .mrpack 文件安装（不下载）。</summary>
+    public Task<ModpackInstallReport> InstallFromArchiveAsync(
+        string mrpackPath,
+        string? instanceNameHint = null,
+        CancellationToken ct = default)
+        => InstallCoreAsync(null, null, mrpackPath, ct, instanceNameHint);
+
+    private async Task<ModpackInstallReport> InstallCoreAsync(
+        ModrinthProject? pack,
+        ModrinthVersion? version,
+        string? localPath,
+        CancellationToken ct,
+        string? nameHint = null)
     {
-        var report = new ModpackInstallReport { PackName = pack.Title };
-        var file = version.PrimaryFile ?? throw new InvalidDataException("整合包版本没有文件");
+        var report = new ModpackInstallReport { PackName = pack?.Title ?? nameHint ?? "整合包" };
 
-        // 1) 下包
-        var temp = Path.Combine(Path.GetTempPath(), $"mcdl-pack-{Guid.NewGuid():N}.mrpack");
-        Log?.Invoke($"下载整合包 {file.Filename}（{SizeFormat.Of(file.Size)}）");
-        var downloader = new SegmentedDownloader { MaxThreads = options.MaxThreads, Log = Log };
-        var dl = await downloader.DownloadAsync(new[]
+        // 1) 下包（本地导入时跳过）
+        string temp;
+        if (localPath is not null)
         {
-            new DownloadFile
+            temp = localPath;
+            Log?.Invoke($"从本地导入整合包：{Path.GetFileName(localPath)}");
+        }
+        else
+        {
+            var file = version!.PrimaryFile ?? throw new InvalidDataException("整合包版本没有文件");
+            temp = Path.Combine(Path.GetTempPath(), $"mcdl-pack-{Guid.NewGuid():N}.mrpack");
+            Log?.Invoke($"下载整合包 {file.Filename}（{SizeFormat.Of(file.Size)}）");
+            var downloader = new SegmentedDownloader { MaxThreads = options.MaxThreads, Log = Log };
+            var dl = await downloader.DownloadAsync(new[]
             {
-                Name = file.Filename, TargetPath = temp, Urls = new[] { file.Url },
-                Size = file.Size, Sha1 = file.Sha1,
-            },
-        }, p => Progress?.Invoke("整合包本体", p), ct).ConfigureAwait(false);
+                new DownloadFile
+                {
+                    Name = file.Filename, TargetPath = temp, Urls = new[] { file.Url },
+                    Size = file.Size, Sha1 = file.Sha1,
+                },
+            }, p => Progress?.Invoke("整合包本体", p), ct).ConfigureAwait(false);
 
-        if (dl.Failed > 0 || !File.Exists(temp))
-        {
-            report.Errors.Add("整合包下载失败：" + string.Join("; ", dl.Errors.Take(2)));
-            return report;
+            if (dl.Failed > 0 || !File.Exists(temp))
+            {
+                report.Errors.Add("整合包下载失败：" + string.Join("; ", dl.Errors.Take(2)));
+                return report;
+            }
         }
 
         try
@@ -182,7 +207,8 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
             Log?.Invoke($"整合包文件 {files.Count} 个");
             if (files.Count > 0)
             {
-                var packDownloaded = await downloader
+                var contentDownloader = new SegmentedDownloader { MaxThreads = options.MaxThreads, Log = Log };
+                var packDownloaded = await contentDownloader
                     .DownloadAsync(files, p => Progress?.Invoke("整合包内容", p), ct).ConfigureAwait(false);
                 report.FilesDownloaded = packDownloaded.Downloaded + packDownloaded.Skipped;
                 if (packDownloaded.Failed > 0) report.Errors.AddRange(packDownloaded.Errors.Take(5));
@@ -195,10 +221,10 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
             File.WriteAllText(Path.Combine(instanceDir, ".mcdl-modpack.json"),
                 JsonSerializer.Serialize(new
                 {
-                    name = index.Name ?? pack.Title,
-                    packVersion = index.VersionId ?? version.VersionNumber,
-                    source = "modrinth",
-                    projectId = pack.Id,
+                    name = index.Name ?? pack?.Title ?? nameHint ?? "整合包",
+                    packVersion = index.VersionId ?? version?.VersionNumber ?? "",
+                    source = pack is null ? "local" : "modrinth",
+                    projectId = pack?.Id,
                     installedAt = DateTimeOffset.Now,
                 }, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -207,7 +233,7 @@ public sealed class ModpackInstaller(MinecraftPaths paths, InstallOptions option
         }
         finally
         {
-            try { File.Delete(temp); } catch { /* 忽略 */ }
+            if (localPath is null) { try { File.Delete(temp); } catch { /* 忽略 */ } }
         }
     }
 

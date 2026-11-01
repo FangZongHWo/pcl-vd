@@ -7,7 +7,8 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         FontFamily="/Assets/#PCL English, Microsoft YaHei UI"
         Icon="Assets/app.ico"
-        UseLayoutRounding="True" SnapsToDevicePixels="True">
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        AllowDrop="True" DragOver="OnWindowDragOver" Drop="OnWindowDrop">
 
   <!-- PCL 的窗口形态：透明窗口 + 圆角浮层 + 阴影 -->
   <Border Margin="8" CornerRadius="10" Background="White">
@@ -277,6 +278,9 @@
                 <ComboBox Grid.Column="2" ItemsSource="{Binding ResourceLoaderOptions}"
                           SelectedItem="{Binding SelectedResourceLoaderOption, Mode=TwoWay}" />
               </Grid>
+              <Button Grid.Row="3" Content="导入 .mrpack…" Style="{StaticResource FlatButton}" FontSize="12"
+                      Height="26" Padding="8,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                      Click="OnImportModpackClick" ToolTip="导入本地下载好的 .mrpack 整合包" />
               <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="2,0,2,6">
                 <Path Style="{StaticResource LoadingRing}" VerticalAlignment="Center" Margin="0,0,6,0"
                       Visibility="{Binding IsResourceBusy, Converter={StaticResource BoolToVis}}" />

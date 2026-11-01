@@ -21,6 +21,7 @@ string? mcArg = null;
 string? instanceArg = null;
 string? installResource = null;
 string? installPack = null;
+string? importPack = null;
 var noAssets = false;
 var kind = SourceKind.Auto;
 var threads = 32;
@@ -40,6 +41,7 @@ for (var i = 0; i < args.Length; i++)
         case "--instance": instanceArg = args[++i]; break;
         case "--install-resource": installResource = args[++i]; break;
         case "--install-pack": installPack = args[++i]; break;
+        case "--import-pack": importPack = args[++i]; break;
         case "--source":
             kind = args[++i].ToLowerInvariant() switch
             {
@@ -125,6 +127,22 @@ if (installResource is not null)
 }
 
 // ---- 装整合包 ----
+if (importPack is not null)
+{
+    if (dir is null) { Console.WriteLine("缺少 --dir"); return 1; }
+    var mcPaths = new MinecraftPaths(dir);
+    var inst = new ModpackInstaller(mcPaths, new InstallOptions { Source = kind, MaxThreads = threads })
+    {
+        Log = Console.WriteLine,
+        Progress = (phase, pr) => Console.WriteLine($"  {phase} {pr.DoneBytes}/{pr.TotalBytes}"),
+    };
+    var rep = await inst.InstallFromArchiveAsync(importPack);
+    Console.WriteLine($"结果: success={rep.Success} instance={rep.InstanceVersionId} files={rep.FilesDownloaded} overrides={rep.OverridesExtracted}");
+    foreach (var w in rep.Warnings.Take(5)) Console.WriteLine("  警告: " + w);
+    foreach (var er in rep.Errors.Take(5)) Console.WriteLine("  错误: " + er);
+    return rep.Success ? 0 : 1;
+}
+
 if (installPack is not null)
 {
     if (dir is null)

@@ -117,4 +117,63 @@ public partial class MainWindow : Window
         translate.BeginAnimation(TranslateTransform.YProperty,
             new DoubleAnimation(10, 0, duration) { EasingFunction = ease });
     }
+    // ---------- 整合包导入 ----------
+
+    private void OnImportModpackClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "选择整合包",
+            Filter = "Modrinth 整合包 (*.mrpack)|*.mrpack|所有文件 (*.*)|*.*",
+            CheckFileExists = true,
+        };
+
+        if (dialog.ShowDialog(this) == true)
+            _ = ImportAsync(dialog.FileName);
+    }
+
+    private void OnWindowDragOver(object sender, DragEventArgs e)
+    {
+        e.Effects = TryGetDroppedPack(e, out _) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void OnWindowDrop(object sender, DragEventArgs e)
+    {
+        if (!TryGetDroppedPack(e, out var path) || path is null) return;
+
+        if (path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            MessageBox.Show(this,
+                "暂时只支持 Modrinth 的 .mrpack 整合包。\nCurseForge 的 .zip 整合包还没做（见路线图阶段 8.3）。",
+                "还不支持这个格式", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        _ = ImportAsync(path);
+    }
+
+    private static bool TryGetDroppedPack(DragEventArgs e, out string? path)
+    {
+        path = null;
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return false;
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] { Length: > 0 } files) return false;
+
+        var first = files[0];
+        if (first.EndsWith(".mrpack", StringComparison.OrdinalIgnoreCase)
+            || first.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            path = first;
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task ImportAsync(string path)
+    {
+        if (DataContext is not MainViewModel vm) return;
+        try { await vm.ImportModpackAsync(path); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, "导入失败"); }
+    }
 }
