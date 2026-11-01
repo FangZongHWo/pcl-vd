@@ -654,8 +654,11 @@ public sealed class MainViewModel : ObservableObject
         };
     }
 
+    private int _searchSeq;
+
     private async Task SearchResourcesAsync()
     {
+        var seq = ++_searchSeq;
         var instance = ResolveInstance();
         var type = CurrentResourceType;
         var (mcFilter, loaderFilter) = ResolveSearchFilter(instance);
@@ -666,6 +669,7 @@ public sealed class MainViewModel : ObservableObject
         // Modrinth 只有英文标题，中文关键词先过一遍常见别名
         var query = ModrinthQuery.Translate(_resourceQuery);
 
+        AppendLog($"# 搜索开始 #{seq}  type={type} mc={mc ?? "全部"} loader={loader ?? "全部"} q=\"{query}\"");
         ResourceStatus = "正在搜索…";
         try
         {
@@ -690,11 +694,13 @@ public sealed class MainViewModel : ObservableObject
                 _ => "点左侧条目查看详情",
             };
 
+            AppendLog($"# 搜索完成 #{seq}，结果 {ResourceResults.Count} / 共 {result.TotalHits}");
             SelectedResource = ResourceResults.FirstOrDefault();
         }
         catch (Exception ex)
         {
             ResourceStatus = "搜索失败：" + ex.Message;
+            AppendLog($"# 搜索异常 #{seq}：{ex.GetType().Name} {ex.Message}");
             AppendLog(ex.ToString());
         }
         finally
@@ -996,8 +1002,23 @@ public sealed class MainViewModel : ObservableObject
         if (!string.IsNullOrEmpty(p.CurrentFile)) CurrentFileName = p.CurrentFile;
     }
 
+    private static readonly object LogLock = new();
+    private static readonly string LogFile =
+        System.IO.Path.Combine(System.IO.Path.GetTempPath(), "pclvd-ui.log");
+
     public void AppendLog(string text)
     {
+        try
+        {
+            lock (LogLock)
+            {
+                var info = new FileInfo(LogFile);
+                if (info.Exists && info.Length > 1_000_000) File.Delete(LogFile);
+                File.AppendAllText(LogFile, $"[{DateTime.Now:HH:mm:ss.fff}] {text}{Environment.NewLine}");
+            }
+        }
+        catch { /* 日志写不进去就算了 */ }
+
         if (_log.Length > 200_000) _log.Clear();
         _log.AppendLine($"[{DateTime.Now:HH:mm:ss}] {text}");
         OnPropertyChanged(nameof(LogText));
